@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir = None,
-            ATAC_h5Seurat = None, frag_Seurat = None, 
+            ATAC_h5Seurat = None, fragment = None, 
             ATAC_rds = None):
     '''
             @author: Jingwan WANG
@@ -11,7 +11,7 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
             Parameters
             ----------
             pred_method : str
-            prediction method, currently only support seurat.
+            prediction method, signac or archr.
 
             species : str
             species of the data, currently only support human and mouse.
@@ -19,7 +19,7 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
             ATAC_h5Seurat : str
             ATAC file with h5Seurat format. No obj@assays$ATAC@fragments yet.
             
-            frag_Seurat : str
+            fragment : str
             fragment file for Seurat. Normally names atac_fragments.tsv.gz
             
             ATAC_rds : str
@@ -32,12 +32,12 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
             Output path
     '''
     if pred_method == 'signac':
-        if not os.path.exists(f'{outDir}/atac_pred_RNA.tsv'):
+        if not os.path.exists(f'{outDir}/{pred_method}_atac_pred_RNA.tsv'):
             if ATAC_h5Seurat:
-                if frag_Seurat:
+                if fragment:
                     # both provided
-                    script_path = os.path.dirname(os.path.realpath(__file__)) + '/scripts/ATAC_seurat_pipeline.R'
-                    os.system(str(f'{Rscript_path} --vanilla {script_path} -s {species} -a {ATAC_h5Seurat} -f {frag_Seurat} -o {outDir}'))
+                    script_path = os.path.dirname(os.path.realpath(__file__)) + '/scripts/ATAC_signac_pipeline.R'
+                    os.system(str(f'{Rscript_path} --vanilla {script_path} -s {species} -a {ATAC_h5Seurat} -f {fragment} -o {outDir}'))
                 else:
                     raise ValueError('Please provide the paired fragment file for Seurat.')
 
@@ -50,9 +50,13 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
                 raise ValueError('Please provide the ATAC file with h5Seurat format or rds format.')
             
     if pred_method == 'archr':
-        print('Building...')
+        # TODO
+        if not os.path.exists(f'{outDir}/{pred_method}_atac_pred_RNA.tsv'):
+            script_path = os.path.dirname(os.path.realpath(__file__)) + '/scripts/ATAC_archR_pipeline.R'
+            os.system(str(f'{Rscript_path} --vanilla {script_path} -s {species} -f {fragment} -o {outDir}'))
+        
     # load pred_rna
-    pred_rna = pd.read_csv(f'{outDir}/atac_pred_RNA.tsv',header=0,index_col=0,sep='\t')
+    pred_rna = pd.read_csv(f'{outDir}/{pred_method}_atac_pred_RNA.tsv',header=0,index_col=0,sep='\t')
     return pred_rna
     
 
@@ -61,7 +65,7 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
 
 # class OmicsToRNA:
 #     def __init__(self, RNA_file = None, RNA_h5ad = None, RNA_h5Seurat = None, 
-#                  ATAC_h5Seurat = None, frag_Seurat = None, species = None,
+#                  ATAC_h5Seurat = None, fragment = None, species = None,
 #                  train_methy = None, train_rna = None, test_methy = None, test_rna = None,
 #                  celltype_key = None, celltype_file = None, 
 #                  python_path = None, Rscript_path = None, outDir = None):
@@ -84,7 +88,7 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
 #             ATAC_h5Seurat : str
 #             ATAC file with h5Seurat format.
             
-#             frag_Seurat : str
+#             fragment : str
 #             fragment file for Seurat. Normally names atac_fragments.tsv.gz
 
 #             train_methy : str
@@ -120,7 +124,7 @@ def atac2RNA(pred_method = 'signac', species = None, Rscript_path = None, outDir
 #         self.RNA_h5ad = RNA_h5ad
 #         self.RNA_h5Seurat = RNA_h5Seurat
 #         self.ATAC_h5Seurat = ATAC_h5Seurat 
-#         self.frag_Seurat = frag_Seurat
+#         self.fragment = fragment
 #         self.species = species
 #         self.train_methy = train_methy
 #         self.train_rna = train_rna

@@ -20,6 +20,7 @@ species = args$species
 out_path = args$out_path
 
 if(species == 'human'){
+    # hg38
     suppressMessages(library(EnsDb.Hsapiens.v75))
     annotation <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v75)
 }else{
@@ -107,5 +108,5 @@ gene.activities <- GeneActivity(pbmc)
 pbmc[['peakRNA']] <- CreateAssayObject(counts = gene.activities)
 rna = t(as.matrix(pbmc@assays$peakRNA@counts))
 write.table(rna,file=paste0(out_path,"atac_pred_RNA.tsv"),row.names=T,col.names = T,sep = '\t',quote = F)
-write.table(pbmc@meta.data, file = paste0(out_path,"atac_pred_meta.tsv"), sep = "\t", quote = F, row.names = T, col.names = T)
-saveRDS(pbmc, file = paste0(out_path,"processed_atac.rds"))
+write.table(pbmc@meta.data, file = paste0(out_path,"signac_atac_pred_meta.tsv"), sep = "\t", quote = F, row.names = T, col.names = T)
+saveRDS(pbmc, file = paste0(out_path,"signac_processed_atac.rds"))
